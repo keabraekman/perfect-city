@@ -2,10 +2,10 @@ import sys
 import time
 import requests
 from bs4 import BeautifulSoup
+from openpyxl import load_workbook
 
-
-main_url = 'https://www.city-data.com'
-
+workbook = load_workbook('perfect-city.xlsx')
+worksheet = workbook.active
 
 states = ["Alaska", "Alabama", "Arkansas", "Arizona", 
 "California", "Colorado", "Connecticut", "District-of-Columbia", 
@@ -23,7 +23,33 @@ def get_html(url):
     return BeautifulSoup(re.text, 'html.parser')
 
 for s in states:
-    target_url = main_url + '/city/' + s + '.html'
-    print(target_url)
+    target_url = 'https://www.city-data.com/city/' + s + '.html'
+    # print(target_url)
 
 
+soup = get_html('https://www.city-data.com/city/Alaska.html')
+tags = soup.tbody
+
+rows = soup.find_all('tr', {'class': 'rB'})
+# print(rows[0].find_all('td')[1].b.a.contents[0])
+
+
+def get_cities(state):
+    soup = get_html('https://www.city-data.com/city/' + state + '.html')
+    cities = []
+    for c in soup.find_all('tr', {'class': 'rB'}):
+        cities.append(c.find_all('td')[1].find_all('a')[0].contents[0])
+    return cities
+
+print(get_cities('Alaska'))
+
+headers = ['city', 'state']
+
+def fill_headers(headers):
+    c = 0
+    for h in headers:
+        worksheet.cell(column=c, row=0).value = h
+        c += 1
+
+fill_headers(headers)
+print('done')
