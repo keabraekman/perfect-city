@@ -49,22 +49,46 @@ def create_city_list():
     for s in states:
         to_add = get_cities(s)
         for c in to_add:
-            # print('c = ', c.split(',')[0])
             cities.append(c.split(',')[0])
     return cities
 
 
 def fill_cities_column(cities):
-    row = 1
+    row = 2
     for c in cities:
         worksheet.cell(row = row, column = 1, value = c)
         row += 1
 
 
-fill_headers(column_titles)
+def number_of_cities(state):
+    return len(get_cities(state))
 
+
+def find_first_empty_row(column):
+    r = 1
+    while(worksheet.cell(row = r, column = column).value is not None):
+        r += 1
+    return r
+
+
+
+
+def fill_state():
+    for s in states:
+        number_of_rows = number_of_cities(s)
+        first_empty_row = find_first_empty_row(2)
+        for i in range(number_of_rows):
+            worksheet.cell(row = first_empty_row+i, column = 2, value = s)
+        workbook.save('perfect-city.xlsx')
+
+print('fill_headers')
+fill_headers(column_titles)
+print('cities')
 cities = create_city_list()
+print('fill_cities_column')
 fill_cities_column(cities)
+print('fill_state')
+fill_state()
 
 
 workbook.save('perfect-city.xlsx')
