@@ -2,9 +2,10 @@ import sys
 import time
 import requests
 from bs4 import BeautifulSoup
-from openpyxl import load_workbook
+from openpyxl import Workbook
 
-workbook = load_workbook('perfect-city.xlsx')
+# workbook = Workbook('perfect-city.xlsx')
+workbook = Workbook()
 worksheet = workbook.active
 
 states = ["Alaska", "Alabama", "Arkansas", "Arizona", 
@@ -18,21 +19,15 @@ states = ["Alaska", "Alabama", "Arkansas", "Arizona",
 "South-Dakota", "Tennessee", "Texas", "Utah", "Virginia", 
 "Vermont", "Washington", "Wisconsin", "West-Virginia", "Wyoming"]
 
+column_titles = ['City', 'State', 'White', 'Hispanic', 'Black', 'Asian', 
+'American Indian', 'Other', 'Pacific Islander', 'Two or more races', 'Population', 
+'Average Age', 'Median Income per Capita', 'Median Income per Household', 
+'Unemployment', 'Poverty level', 'Trump', 'Biden', 'Average BMI', 'Overweight percentage',
+'number of sunny days', 'percentage of women', 'Violent Crime', 'Population Density', 'tax rate']
+
 def get_html(url):
     re = requests.get(url)
     return BeautifulSoup(re.text, 'html.parser')
-
-for s in states:
-    target_url = 'https://www.city-data.com/city/' + s + '.html'
-    # print(target_url)
-
-
-soup = get_html('https://www.city-data.com/city/Alaska.html')
-tags = soup.tbody
-
-rows = soup.find_all('tr', {'class': 'rB'})
-# print(rows[0].find_all('td')[1].b.a.contents[0])
-
 
 def get_cities(state):
     soup = get_html('https://www.city-data.com/city/' + state + '.html')
@@ -41,15 +36,37 @@ def get_cities(state):
         cities.append(c.find_all('td')[1].find_all('a')[0].contents[0])
     return cities
 
-print(get_cities('Alaska'))
 
-headers = ['city', 'state']
+def fill_headers(titles):
+    column = 1
+    for t in titles:
+        worksheet.cell(row = 1, column = column, value = t)
+        column += 1
 
-def fill_headers(headers):
-    c = 0
-    for h in headers:
-        worksheet.cell(column=c, row=0).value = h
-        c += 1
 
-fill_headers(headers)
-print('done')
+def create_city_list():
+    cities = []
+    for s in states:
+        to_add = get_cities(s)
+        for c in to_add:
+            # print('c = ', c.split(',')[0])
+            cities.append(c.split(',')[0])
+    return cities
+
+
+def fill_cities_column(cities):
+    row = 1
+    for c in cities:
+        worksheet.cell(row = row, column = 1, value = c)
+        row += 1
+
+
+fill_headers(column_titles)
+
+cities = create_city_list()
+fill_cities_column(cities)
+
+
+workbook.save('perfect-city.xlsx')
+
+
