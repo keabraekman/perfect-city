@@ -69,14 +69,14 @@ for row in worksheet.values:
 
 
 native = 0
-black = 0
-hispanic = 0.1
+black = 0.0
+hispanic = 0.0
 asian = 0.3
-white = 0.6
+white = 0.7
 
 minimum_population = 200000
 
-preferences = [0,0,0,1,0,minimum_population]
+preferences = [native,black,hispanic,asian,white,minimum_population]
 
 
 # minimum_population = 500000
@@ -100,6 +100,7 @@ for row in worksheet.values:
     if(race(row) == 'White'):
         delta[city(row)][4] = abs(cities[city(row)][4] - preferences[4])
     # delta[city(row)][5] = abs(cities[city(row)][5] - preferences[5])
+    # If city is larger than prefered minimum population
     if(preferences[5] < cities[city(row)][5]):
         delta[city(row)][5] = True
     else:
